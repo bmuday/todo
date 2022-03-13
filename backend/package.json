@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon .",
-    "start": "concurrently -c 'blue, green' -n 'server, client' 'npm run dev' 'npm start --prefix frontend' ",
+    "server": "nodemon .",
+    "client": "npm start",
+    "dev": "concurrently -c 'blue, green' -n 'server, client' 'npm run dev' 'npm start --prefix frontend' ",
     "build": ""
   },
   "repository": {
@@ -30,7 +31,6 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "concurrently": "^7.0.0",
     "nodemon": "^2.0.15"
   }
 }
