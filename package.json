@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon .",
-    "start": "concurrently -c 'blue, green' -n 'server, client' 'npm run dev' 'npm start --prefix frontend' ",
+    "server": "cd backend && nodemon server.js",
+    "client": "npm start --prefix frontend",
+    "dev": "concurrently -c 'blue, green' -n 'server, client' 'npm run server' 'npm run client' ",
     "build": ""
   },
   "repository": {
