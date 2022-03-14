@@ -8,7 +8,7 @@ const checkUser = async (req, res, next) => {
       const payload = jwt.verify(token, process.env.TOKEN_SECRET);
       let user = await User.findById(payload.id);
       res.locals.user = user;
-      console.log("res.locals", res.locals);
+      console.log(res.locals);
       next();
     } catch (err) {
       console.log(err.message);

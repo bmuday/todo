@@ -5,14 +5,14 @@ const {
 } = require("../middlewares/validation");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
+const asyncHandler = require("express-async-handler");
 
 // Create and assign a token
 const createToken = (id, expiration) => {
   return jwt.sign({ id }, process.env.TOKEN_SECRET, { expiresIn: expiration });
 };
 
-const registerUser = async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { error, value } = registerValidation(req.body);
 
   if (error) return res.status(400).send(error.details[0].message);
@@ -30,24 +30,20 @@ const registerUser = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  try {
-    const user = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
-    if (user) {
-      const maxAge = 5 * 60; // 5min d'expiration
-      const token = createToken(user._id, maxAge);
-      res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-      res.status(201).send(`User ${user} registered with token ${token}`);
-    }
-  } catch (err) {
-    res.status(400).send(err);
+  const user = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+  });
+  if (user) {
+    const maxAge = 5 * 60; // 5min d'expiration
+    const token = createToken(user._id, maxAge);
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(201).send(`User ${user} registered with token ${token}`);
   }
-};
+});
 
-const loginUser = async (req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
   const { error, value } = loginValidation(req.body);
 
   if (error) return res.status(400).send(error.details[0].message);
@@ -65,11 +61,11 @@ const loginUser = async (req, res) => {
   const token = createToken(user._id, maxAge);
   res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
   res.status(201).send(`User ${user} logged in with token ${token}`);
-};
+});
 
-const logoutUser = async (req, res) => {
+const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("jwt", "", { maxAge: 1 });
   res.redirect("/");
-};
+});
 
 module.exports = { registerUser, loginUser, logoutUser };
