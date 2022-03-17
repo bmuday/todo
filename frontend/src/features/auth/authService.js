@@ -1,5 +1,5 @@
 import axios from "axios";
-const API_URL = "http://localhost:5000";
+const API_URL = "https://todo-app-bmuday.herokuapp.com";
 
 // Register user
 const register = async (userData) => {
