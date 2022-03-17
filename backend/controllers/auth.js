@@ -1,11 +1,11 @@
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const asyncHandler = require("express-async-handler");
 const {
   registerValidation,
   loginValidation,
 } = require("../middlewares/validation");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
 
 // Create and assign a token
 const createToken = (id, expiration) => {
@@ -15,57 +15,81 @@ const createToken = (id, expiration) => {
 const registerUser = asyncHandler(async (req, res) => {
   const { error, value } = registerValidation(req.body);
 
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) {
+    res.status(400);
+    throw new Error(error);
+  }
 
   const { username, email, password } = value;
 
   // Checking if the user is already in the database
   const usernameExists = await User.findOne({ username });
-  if (usernameExists) return res.status(400).send("Username already taken");
+  if (usernameExists) {
+    res.status(400);
+    throw new Error("Username already taken");
+  }
 
   const emailExists = await User.findOne({ email });
-  if (emailExists) return res.status(400).send("Email already exists");
+  if (emailExists) {
+    res.status(400);
+    throw new Error("Email already exists");
+  }
 
   // Hashing password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
+  // Create user
   const user = await User.create({
     username,
     email,
     password: hashedPassword,
   });
   if (user) {
-    const maxAge = 5 * 60; // 5min d'expiration
+    const maxAge = 15 * 60; // 5min d'expiration
     const token = createToken(user._id, maxAge);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).send(`User ${user} registered with token ${token}`);
+    res.status(201).json({
+      id: user._id,
+      username: user.username,
+      token,
+    });
+  } else {
+    res.status(400);
+    throw new Error("Invalid user data");
   }
 });
 
 const loginUser = asyncHandler(async (req, res) => {
   const { error, value } = loginValidation(req.body);
 
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) {
+    res.status(400);
+    throw new Error(error);
+  }
 
   const { email, password } = value;
 
   // Checking if the email is already in the database
   const user = await User.findOne({ email });
-  if (!user) return res.status(400).send("Email is not found");
+  if (!user) {
+    res.status(400);
+    throw new Error("Email not found");
+  }
 
   //Checking if password is correct
   const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) return res.status(400).send("Wrong password");
-  const maxAge = 5 * 60; // 5min d'expiration
+  if (!validPassword) {
+    res.status(400);
+    throw new Error("Wrong password");
+  }
+
+  const maxAge = 15 * 60; // 5min d'expiration
   const token = createToken(user._id, maxAge);
-  res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-  res.status(201).send(`User ${user} logged in with token ${token}`);
+  res.status(201).json({
+    id: user._id,
+    username: user.username,
+    token,
+  });
 });
 
-const logoutUser = asyncHandler(async (req, res) => {
-  res.cookie("jwt", "", { maxAge: 1 });
-  res.redirect("/");
-});
-
-module.exports = { registerUser, loginUser, logoutUser };
+module.exports = { registerUser, loginUser };

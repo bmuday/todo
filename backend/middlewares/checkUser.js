@@ -2,9 +2,15 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const checkUser = async (req, res, next) => {
-  const token = req.cookies.jwt;
-  if (token) {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
+      // Get token from header
+      token = req.headers.authorization.split(" ")[1];
       const payload = jwt.verify(token, process.env.TOKEN_SECRET);
       let user = await User.findById(payload.id);
       res.locals.user = user;
@@ -15,7 +21,9 @@ const checkUser = async (req, res, next) => {
       res.locals.user = null;
       next();
     }
-  } else {
+  }
+
+  if (!token) {
     res.locals.user = null;
     console.log(res.locals);
     next();
