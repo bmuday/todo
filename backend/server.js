@@ -35,23 +35,23 @@ app.get("*", checkUser);
 app.use(authRoute);
 app.use("/posts", postRoute);
 
+// Formating errors
+app.use(errorHandler);
+
 // Serve frontend
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/build")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(
-      path.resolve(__dirname, "../", "frontend", "build", "index.html")
-    );
-  });
+  // app.get("*", (req, res) => {
+  //   res.sendFile(
+  //     path.resolve(__dirname, "../", "frontend", "build", "index.html")
+  //   );
+  // });
 } else {
   app.get("/", (req, res) => {
     res.send("Please set to production.");
   });
 }
-
-// Formating errors
-app.use(errorHandler);
 
 // Server
 app.listen(PORT, () => {
