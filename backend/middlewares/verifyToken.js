@@ -4,6 +4,7 @@ const User = require("../models/User");
 
 const verify = asyncHandler(async (req, res, next) => {
   let token;
+  console.log("verify");
 
   if (
     req.headers.authorization &&

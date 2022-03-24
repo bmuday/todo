@@ -12,7 +12,11 @@ const getPosts = async (token) => {
     },
   };
   const res = await axios.get(`${API_URL}/posts`, config);
-  console.log("posts1");
+  console.log(`${API_URL}/posts`);
+
+  if ("https://todo-app-bmuday.herokuapp.com/posts" === `${API_URL}/posts`)
+    console.log("true path");
+
   console.log("res", res);
   if (res.data.message) {
     console.log("postsError");
