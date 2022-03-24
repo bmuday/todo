@@ -1,5 +1,8 @@
 import axios from "axios";
-const API_URL = "https://todo-app-bmuday.herokuapp.com";
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://todo-app-bmuday.herokuapp.com"
+    : "http://localhost:5000";
 
 // Get all posts
 const getPosts = async (token) => {
