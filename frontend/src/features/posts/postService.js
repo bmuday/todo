@@ -12,7 +12,10 @@ const getPosts = async (token) => {
     },
   };
   const res = await axios.get(`${API_URL}/posts`, config);
+  console.log("posts1");
+  console.log("res", res);
   if (res.data.message) {
+    console.log("postsError");
     throw new Error(res.data.message);
   }
   return res.data;
